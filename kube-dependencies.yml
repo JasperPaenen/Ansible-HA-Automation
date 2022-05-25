@@ -1,0 +1,130 @@
+- hosts: all
+  become: 'yes'
+  tasks:
+    - name: Add load balancer entry to /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^{{ item[''ip''] }}.*$'
+        line: "{{ item['ip'] }}\t{{ item['names'] | join(' ') }}"
+        state: present
+      with_items:
+        - ip: 10.0.1.30
+          names:
+            - Load-balancer-01
+    - name: add hosts entry to /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^{{ item }}.*$'
+        line: '{{ hostvars[item][''ansible_host''] }} {{ item }}'
+        state: present
+      when: 'hostvars[item][''ansible_host''] is defined'
+      with_items:
+        - '{{ groups[''all''] }}'
+    - name: setup hostnames
+      hostname:
+        name: '{{ inventory_hostname }}'
+    - name: Install Python
+      apt:
+        name: python3.8
+    - name: Install Python-pip
+      apt:
+        name: python3-pip
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+    - name: Install Docker Module for Python
+      pip:
+        name: docker       
+    - name: Creates /etc/docker directory
+      file:
+        path: /etc/docker
+        state: directory
+    - name: Create Docker Daemon file
+      copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "exec-opts": ["native.cgroupdriver=systemd"],
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "100m"
+            },
+            "storage-driver": "overlay2",
+            "storage-opts": [
+              "overlay2.override_kernel_check=true"
+            ]
+          }
+    - name: Creates Docker Daemon directory
+      file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+        mode: 511
+    - name: enable docker
+      systemd:
+        name: docker
+        enabled: 'yes'
+    - name: reload systemd
+      command: systemctl daemon-reload
+    - name: start Docker
+      service:
+        name: docker
+        state: restarted
+    - name: disable swap
+      command: swapoff -a
+    - name: set iptables
+      shell: update-alternatives --set iptables /usr/sbin/iptables-legacy | cat
+    - name: ensure net.bridge.bridge-nf-call-ip6tables is set to 1
+      sysctl:
+        name: net.bridge.bridge-nf-call-ip6tables
+        value: 1
+        state: present
+    - name: ensure net.bridge.bridge-nf-call-iptables is set to 1
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        state: present
+    - name: load br_netfilter
+      command: modprobe br_netfilter
+    - name: Add Kubernets apt_key
+      ansible.builtin.apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+    - name : Add Kubernetes Repository
+      ansible.builtin.apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+    - name: install kubelet
+      apt:
+        name: kubelet
+        state: present
+        update_cache: true
+    - name: install kubeadm
+      apt:
+        name: kubeadm
+        state: present
+    - name: start kubelet
+      service:
+        name: kubelet
+        enabled: 'yes'
+        state: started
+    - name: enable kubelet
+      systemd:
+        name: kubelet
+        enabled: 'yes'
+- hosts: masters
+  become: 'yes'
+  tasks:
+    - name: install kubectl
+      apt:
+        name: kubectl
+        state: present
