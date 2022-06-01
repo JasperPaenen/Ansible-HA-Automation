@@ -4,7 +4,7 @@
     password: student
   tasks:
     - name: create the admin user
-      user: name=admin append=yes state=present createhome=yes shell=/bin/bash password={{password}}
+      user: name=admin append=yes state=present createhome=yes shell=/bin/bash password="{{password | password_hash('sha512')}}"
     - name: give admin passwordless sudo
       lineinfile:
         dest: /etc/sudoers
