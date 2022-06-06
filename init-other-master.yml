@@ -1,4 +1,4 @@
-- hosts: Master-01
+- hosts: master-02
   become: yes
   gather_facts: false
   tasks:
@@ -12,16 +12,16 @@
       add_host: 
         name: "master_host"
         master_join_command: "{{ join_command.stdout }} --certificate-key {{ certs.stdout_lines[2]}}"
-- hosts: Master-02, Master-03
+- hosts: master-02, master-03
   become: yes
   gather_facts: false
   tasks:
-    - name: daemon-reload
+    - name: Remove File
       become: yes
       ansible.builtin.file:
         path: /etc/containerd/config.toml
         state: absent
-    - name: Restart service httpd, in all cases
+    - name: Restart service deamond
       ansible.builtin.service:
         name: containerd
         state: restarted

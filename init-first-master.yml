@@ -1,4 +1,4 @@
-- hosts: Master-02
+- hosts: master-01
   become: yes
   tasks:
     - name: daemon-reload

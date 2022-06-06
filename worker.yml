@@ -3,6 +3,18 @@
   gather_facts: false
 
   tasks:
+
+    - name: Remove File
+      become: yes
+      ansible.builtin.file:
+        path: /etc/containerd/config.toml
+        state: absent
+
+    - name: Restart service deamond
+      ansible.builtin.service:
+        name: containerd
+        state: restarted
+
     - name: get join command
       shell: kubeadm token create --print-join-command
       register: join_command
