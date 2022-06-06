@@ -1,6 +1,15 @@
-- hosts: master-01
+- hosts: Master-02
   become: yes
   tasks:
+    - name: daemon-reload
+      become: yes
+      ansible.builtin.file:
+        path: /etc/containerd/config.toml
+        state: absent
+    - name: Restart service httpd, in all cases
+      ansible.builtin.service:
+        name: containerd
+        state: restarted
     - name: daemon-reload
       shell: systemctl daemon-reload
     - name: restart kubelet
