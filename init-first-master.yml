@@ -1,12 +1,12 @@
 - hosts: master-01
   become: yes
   tasks:
-    - name: daemon-reload
+    - name: Remove file
       become: yes
       ansible.builtin.file:
         path: /etc/containerd/config.toml
         state: absent
-    - name: Restart service httpd, in all cases
+    - name: Restart service containerd
       ansible.builtin.service:
         name: containerd
         state: restarted
