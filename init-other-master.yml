@@ -1,4 +1,4 @@
-- hosts: master-02
+- hosts: master-01
   become: yes
   gather_facts: false
   tasks:
@@ -12,6 +12,7 @@
       add_host: 
         name: "master_host"
         master_join_command: "{{ join_command.stdout }} --certificate-key {{ certs.stdout_lines[2]}}"
+        
 - hosts: master-02, master-03
   become: yes
   gather_facts: false
