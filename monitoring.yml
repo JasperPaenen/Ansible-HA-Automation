@@ -49,7 +49,7 @@
       shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
       become_user: admin
     - name: Deploy Kubernetes dashboard
-      shell: kubectl expose deployment kubernetes-dashboard -n kubernetes-dashboard --name=dashboard --type=LoadBalancer
+      shell: kubectl expose deployment kubernetes-dashboard -n kubernetes-dashboard --name=dashboard --type=NodePort
       become_user: admin
     - name: Create user for token
       shell: kubectl apply -f dashboard-user.yml
