@@ -2,28 +2,28 @@
   become: yes
   tasks:
     - name: Kubernetes namespace
-      shell: kubectl create namespace monitoring
+      shell: chdir=/home/admin/Ansible-HA-Automation && kubectl create namespace monitoring
       become_user: admin
     - name: Create cluster role
-      shell: kubectl create -f clusterRole.yaml
+      shell: chdir=/home/admin/Ansible-HA-Automation && kubectl create -f clusterRole.yaml
       become_user: admin
     - name: Create config-map
-      shell: kubectl create -f config-map.yaml
+      shell: chdir=/home/admin/Ansible-HA-Automation && kubectl create -f config-map.yaml
       become_user: admin
     - name: Create Prometheus deployment
-      shell: kubectl create  -f prometheus-deployment.yaml 
+      shell: chdir=/home/admin/Ansible-HA-Automation && kubectl create  -f prometheus-deployment.yaml 
       become_user: admin
     - name: Create Prometheus service
-      shell: kubectl create -f prometheus-service.yaml --namespace=monitoring
+      shell: chdir=/home/admin/Ansible-HA-Automation && kubectl create -f prometheus-service.yaml --namespace=monitoring
       become_user: admin
     - name: Create grafana source
-      shell: kubectl create -f grafana-datasource-config.yaml
+      shell: chdir=/home/admin/Ansible-HA-Automation && kubectl create -f grafana-datasource-config.yaml
       become_user: admin
     - name: Create grafana deployment
-      shell: kubectl create -f deployment.yaml
+      shell: chdir=/home/admin/Ansible-HA-Automation && kubectl create -f deployment.yaml
       become_user: admin
     - name: Create grafana service
-      shell: kubectl create -f service.yaml
+      shell: chdir=/home/admin/Ansible-HA-Automation && kubectl create -f service.yaml
       become_user: admin
 
 
