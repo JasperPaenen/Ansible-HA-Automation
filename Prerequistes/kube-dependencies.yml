@@ -42,6 +42,7 @@
         name: docker-ce
         state: latest
         update_cache: true
+        become: yes
     - name: Install Docker Module for Python
       pip:
         name: docker       
