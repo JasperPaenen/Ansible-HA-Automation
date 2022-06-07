@@ -12,7 +12,7 @@
       args:
         chdir: /home/admin/Ansible-HA-Automation
     - name: Create config-map
-      shell: && kubectl create -f config-map.yaml
+      shell: kubectl create -f config-map.yaml
       become_user: admin
       args:
         chdir: /home/admin/Ansible-HA-Automation
