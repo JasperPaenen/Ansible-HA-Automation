@@ -57,6 +57,9 @@
     - name: Create cluster role ClusterRoleBinding for token
       shell: kubectl apply -f ClusterRoleBinding.yml
       become_user: admin
+    - name: Create token for dashboard pipe into text file
+      shell: kubectl -n kubernetes-dashboard create token admin-user >> token.txt
+      become_user: admin
     - name: Recursively remove directory
       ansible.builtin.file:
         path: /home/admin/Ansible-HA-Automation
