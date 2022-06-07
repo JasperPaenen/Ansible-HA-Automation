@@ -18,12 +18,8 @@
       apt:
         name: helm
         state: present
-    - name: Create a k8s namespace
-      kubernetes.core.k8s:
-          name: prometheus
-          api_version: v1
-          kind: Namespace
-          state: present
+    - name: Kubernetes namespace
+      shell: kubectl create namespace prometheus
 
     
     
