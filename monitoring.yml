@@ -17,7 +17,7 @@
       args:
         chdir: /home/admin/Ansible-HA-Automation
     - name: Create Prometheus deployment
-      shell: && kubectl create  -f prometheus-deployment.yaml 
+      shell: kubectl create  -f prometheus-deployment.yaml 
       become_user: admin
       args:
         chdir: /home/admin/Ansible-HA-Automation
