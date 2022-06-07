@@ -21,6 +21,7 @@
         state: present
     - name: Kubernetes namespace
       shell: kubectl create namespace prometheus
+      become_user: admin
 
     
     
