@@ -62,7 +62,7 @@
       args:
         chdir: /home/admin/Ansible-HA-Automation
     - name: Create token for dashboard pipe into text file
-      shell: kubectl -n kubernetes-dashboard create token admin-user >> token.txt
+      shell: kubectl -n kubernetes-dashboard create token admin-user >> /home/admin/token.txt
       become_user: admin
     - name: Recursively remove directory
       ansible.builtin.file:
