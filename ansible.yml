@@ -5,12 +5,12 @@
 - name: Run user.yml
   import_playbook: /home/student/Ansible-HA-Automation/User/user.yml
 - name: Run kube-dependencies.yml
-  import_playbook: kube-dependencies.yml
+  import_playbook: /home/student/Ansible-HA-Automation/Prerequistes/kube-dependencies.yml
 - name: Run init-first-master.yml
-  import_playbook: init-first-master.yml
+  import_playbook: /home/student/Ansible-HA-Automation/Master/init-first-master.yml
 - name: Run init-other-master.yml
-  import_playbook: init-other-master.yml
+  import_playbook: /home/student/Ansible-HA-Automation/Master/init-other-master.yml
 - name: Run worker.yml
-  import_playbook: worker.yml
+  import_playbook: /home/student/Ansible-HA-Automation/Worker/worker.yml
 - name: Run monitoring.yml
-  import_playbook: monitoring.yml
+  import_playbook: /home/student/Ansible-HA-Automation/Monitoring/monitoring.yml
