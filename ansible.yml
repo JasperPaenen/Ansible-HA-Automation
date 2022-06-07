@@ -3,7 +3,7 @@
     - debug:
         msg: play1
 - name: Run user.yml
-  import_playbook: /User/user.yml
+  import_playbook: /Ansible-HA-Automation/User/user.yml
 - name: Run kube-dependencies.yml
   import_playbook: kube-dependencies.yml
 - name: Run init-first-master.yml
