@@ -18,9 +18,9 @@
       apt:
         name: helm
         state: present
-    - name: Kubernetes namespace
-      shell: kubectl create namespace prometheus
-      become_user: admin
+    #- name: Kubernetes namespace
+    #  shell: kubectl create namespace prometheus
+    #  become_user: admin
     - name: Install prometheus
       shell: helm install prometheus stable/prometheus-operator --namespace prometheus
 
