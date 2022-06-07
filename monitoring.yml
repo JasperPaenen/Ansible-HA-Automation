@@ -51,6 +51,12 @@
     - name: Deploy Kubernetes dashboard
       shell: kubectl expose deployment kubernetes-dashboard -n kubernetes-dashboard --name=dashboard
       become_user: admin
+    - name: Create user for token
+      shell: kubectl apply -f dashboard-user.yml
+      become_user: admin
+    - name: Create cluster role ClusterRoleBinding for token
+      shell: kubectl apply -f ClusterRoleBinding.yml
+      become_user: admin
     - name: Recursively remove directory
       ansible.builtin.file:
         path: /home/admin/Ansible-HA-Automation
