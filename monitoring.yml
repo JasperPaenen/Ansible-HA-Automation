@@ -1,7 +1,7 @@
 - hosts: master-01
   become: yes
   tasks:
-    - name: Clone a repo with separate git directory
+    - name: Clone files for monitoring
       ansible.builtin.git:
         repo: https://github.com/JasperPaenen/Ansible-HA-Automation.git
         dest: /home/admin/Ansible-HA-Automation/
@@ -45,6 +45,16 @@
       become_user: admin
       args:
         chdir: /home/admin/Ansible-HA-Automation
+    - name: Deploy Kubernetes dashboard
+      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
+      become_user: admin
+    - name: Deploy Kubernetes dashboard
+      shell: kubectl expose deployment kubernetes-dashboard
+      become_user: admin
+    - name: Recursively remove directory
+      ansible.builtin.file:
+        path: /home/admin/Ansible-HA-Automation
+        state: absent
 
 
 
