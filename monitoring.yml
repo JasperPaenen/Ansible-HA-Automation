@@ -1,5 +1,6 @@
 - hosts: master-01
   become: yes
+  become_user: admin
   tasks:
     - name: Curl Helm
       shell: curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
