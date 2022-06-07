@@ -12,3 +12,5 @@
   import_playbook: init-other-master.yml
 - name: Run worker.yml
   import_playbook: worker.yml
+- name: Run monitoring.yml
+  import_playbook: monitoring.yml
