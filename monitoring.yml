@@ -1,6 +1,10 @@
 - hosts: master-01
   become: yes
   tasks:
+    - name: Clone a repo with separate git directory
+      ansible.builtin.git:
+      repo: https://github.com/JasperPaenen/Ansible-HA-Automation/blob/main/monitoring.yml
+      dest: /home/admin/
     - name: Kubernetes namespace
       shell: kubectl create namespace monitoring
       become_user: admin
