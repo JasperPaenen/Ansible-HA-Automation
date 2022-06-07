@@ -1,10 +1,15 @@
 - hosts: all
   become: yes
-  vars:
-    password: student
+  vars_prompt:
+    - name: password
+      prompt: Voer wachtwoord in voor kube-admin account
+      private: yes
+      encrypt: sha512_crypt
+      confirm: yes
+      salt_size: 7
   tasks:
     - name: create the admin user
-      user: name=admin append=yes state=present createhome=yes shell=/bin/bash password="{{password | password_hash('sha512')}}"
+      user: name=admin append=yes state=present createhome=yes shell=/bin/bash password="{{password}}"
     - name: give admin passwordless sudo
       lineinfile:
         dest: /etc/sudoers
