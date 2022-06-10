@@ -36,7 +36,7 @@
       become_user: admin
 
     - name: Expose Grafana Dashboard
-      shell: kubectl expose deployment prometheus-grafana --type=NodePort --name=prometheus-grafana -namespace prometheus 
+      shell: kubectl expose deployment prometheus-grafana --type=NodePort --name=prometheus-grafana -n prometheus
       become_user: admin
 
     - name: Kubedashbord Account
@@ -58,6 +58,7 @@
     - name: Kubernetes Dashboard Token
       shell: kubectl -n kubernetes-dashboard create token admin-user
       register: token_output
+      become_user: admin
 
     - name: Belangrijke info naar /tmp/
       copy:
