@@ -4,13 +4,17 @@
     - name: create prometheus namespace
       shell: kubectl create namespace monitoring
     
-    - name: Install helm prerequisits
+    - name: Helm GPG key toevoegen 1
       shell: curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null 
+
+    - name: Intall Transport installeren 
       apt:
         name: apt-transport-https
       
-    - name: Install helm
+    - name: Helm GPG key toevoegen 2
       shell: echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+      
+    - name: Install helm  
       apt:
         update_cashe: yes
         name: helm
