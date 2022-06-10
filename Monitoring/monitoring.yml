@@ -2,7 +2,13 @@
   become: yes
 
   tasks:
-    - name: create Prometheus namespace
+    - name: Clone files
+      ansible.builtin.git:
+        repo: https://github.com/JasperPaenen/Ansible-HA-Automation.git
+        version: Test
+        dest: /home/admin/Ansible-HA-Automation
+
+    - name: Create Prometheus namespace
       shell: kubectl create namespace prometheus
       become_user: admin
     
@@ -65,3 +71,8 @@
         content: "{{ token_output.stdout }}"
         dest: "/tmp/belangrijk.txt"
       delegate_to: localhost
+
+    - name: Clean up
+      ansible.builtin.file:
+        path: /home/admin/Ansible-HA-Automation
+        state: absent 
