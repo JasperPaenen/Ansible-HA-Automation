@@ -1,20 +1,66 @@
 - hosts: master-01
-  become: admin
-  tasks:
-    - name: create prometheus namespace
-      shell: kubectl create namespace monitoring
-    
-    - name: Helm GPG key toevoegen 1
-      shell: curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null 
+  become: yes
 
-    - name: Intall Transport installeren 
+  tasks:
+    - name: create Prometheus namespace
+      shell: kubectl create namespace prometheus
+      become_user: admin
+    
+    - name: Add Helm GPG key 
+      shell: curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null 
+      args:
+        warn: false
+
+    - name: Intall Transport 
       apt:
         name: apt-transport-https
       
-    - name: Helm GPG key toevoegen 2
+    - name: Add Helm GPG key
       shell: echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
       
     - name: Install helm  
       apt:
-        update_cashe: yes
+        update_cache: yes
         name: helm
+
+    - name: Add Prometheus Stack repo
+      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts && helm repo update
+      become_user: admin
+
+    - name: Install Prometheus Stack 
+      shell: helm install prometheus prometheus-community/kube-prometheus-stack --namespace prometheus
+      become_user: admin
+
+    - name: Delete Service
+      shell: kubectl delete service prometheus-grafana -n prometheus
+      become_user: admin
+
+    - name: Expose Grafana Dashboard
+      shell: kubectl expose deployment prometheus-grafana --type=NodePort --name=prometheus-grafana -namespace prometheus 
+      become_user: admin
+
+    - name: Kubedashbord Account
+      shell: kubectl apply -f ~/Ansible-HA-Automation/src/Service-Account.yml
+      become_user: admin
+
+    - name: Kubedashbord Role Binding
+      shell: kubectl apply -f ~/Ansible-HA-Automation/src/ClusterRoleBinding.yml
+      become_user: admin
+
+    - name: Install Kubernetes Dashboard
+      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
+      become_user: admin
+
+    - name: Expose Kubernetes Dashboard
+      shell: kubectl delete service kubernetes-dashboard -n kubernetes-dashboard && kubectl expose deployment kubernetes-dashboard --type=NodePort --name=kubernetes-dashboard -n kubernetes-dashboard
+      become_user: admin
+
+    - name: Kubernetes Dashboard Token
+      shell: kubectl -n kubernetes-dashboard create token admin-user
+      register: token_output
+
+    - name: Belangrijke info naar /tmp/
+      copy:
+        content: "{{ token_output.stdout }}"
+        dest: "/tmp/belangrijk.txt"
+      delegate_to: localhost
