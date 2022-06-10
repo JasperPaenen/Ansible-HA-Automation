@@ -1,0 +1,16 @@
+- hosts: master-01
+  become: admin
+  tasks:
+    - name: create prometheus namespace
+      shell: kubectl create namespace monitoring
+    
+    - name: Install helm prerequisits
+      shell: curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null 
+      apt:
+        name: apt-transport-https
+      
+    - name: Install helm
+      shell: echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+      apt:
+        update_cashe: yes
+        name: helm
