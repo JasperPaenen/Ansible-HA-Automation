@@ -44,11 +44,11 @@
       become_user: admin
 
     - name: Kubedashbord Admin Account
-      shell: kubectl create serviceaccount dashboard-admin
+      shell: kubectl -n kubernetes-dashboard create serviceaccount dashboard-admin
       become_user: admin
 
     - name: Kubedashbord Role Binding
-      shell: kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
+      shell: kubectl -n kubernetes-dashboard create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
       become_user: admin
 
     - name: Expose Kubernetes Dashboard
@@ -77,4 +77,5 @@
           "{{ token_output.stdout }}"
           "{{dashboard_port.stdout}}"
           "{{grafana_port.stdout}}"
+          "Grafna admin:prom-operator"
       delegate_to: localhost
