@@ -46,7 +46,7 @@
       become_user: admin
 
     - name: Kubedashbord Account
-      shell: kubectl apply -f ~/Ansible-HA-Automation/Monitoring/src/Service-Account.yml
+      shell: kubectl apply -f ~/Ansible-HA-Automation/Monitoring/src/Service-account.yml
       become_user: admin
 
     - name: Kubedashbord Role Binding
