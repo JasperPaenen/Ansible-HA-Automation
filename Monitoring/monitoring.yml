@@ -1,79 +1,81 @@
 - hosts: master-01
   become: yes
+
   tasks:
-    - name: Clone files for monitoring
-      ansible.builtin.git:
-        repo: https://github.com/JasperPaenen/Ansible-HA-Automation.git
-        dest: /home/admin/Ansible-HA-Automation/
-    - name: Kubernetes namespace
-      shell: kubectl create namespace monitoring
+    - name: Create Prometheus namespace
+      shell: kubectl create namespace prometheus
       become_user: admin
+    
+    - name: Add Helm GPG key 1
+      shell: curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null 
       args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Create cluster role
-      shell: kubectl create -f clusterRole.yaml
+        warn: false
+
+    - name: Intall Transport 
+      apt:
+        name: apt-transport-https
+      
+    - name: Add Helm GPG key 2
+      shell: echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+      
+    - name: Install helm  
+      apt:
+        update_cache: yes
+        name: helm
+
+    - name: Add Prometheus Stack repo
+      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts && helm repo update
       become_user: admin
-      args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Create config-map
-      shell: kubectl create -f config-map.yaml
+
+    - name: Install Prometheus Stack 
+      shell: helm install prometheus prometheus-community/kube-prometheus-stack --namespace prometheus
       become_user: admin
-      args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Create Prometheus deployment
-      shell: kubectl create  -f prometheus-deployment.yaml 
+
+    - name: Delete Service
+      shell: kubectl delete service prometheus-grafana -n prometheus
       become_user: admin
-      args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Create Prometheus service
-      shell: kubectl create -f prometheus-service.yaml --namespace=monitoring
+
+    - name: Expose Grafana Dashboard
+      shell: kubectl expose deployment prometheus-grafana --type=NodePort --name=prometheus-grafana -n prometheus
       become_user: admin
-      args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Create grafana source
-      shell: kubectl create -f grafana-datasource-config.yaml
-      become_user: admin
-      args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Create grafana deployment
-      shell: kubectl create -f deployment.yaml
-      become_user: admin
-      args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Create grafana service
-      shell: kubectl create -f service.yaml
-      become_user: admin
-      args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Deploy Kubernetes dashboard
+
+    - name: Install Kubernetes Dashboard
       shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
       become_user: admin
-    - name: Deploy Kubernetes dashboard
-      shell: kubectl expose deployment kubernetes-dashboard -n kubernetes-dashboard --name=dashboard --type=NodePort
+
+    - name: Kubedashbord Admin Account
+      shell: kubectl -n kubernetes-dashboard create serviceaccount dashboard-admin
       become_user: admin
-    - name: Create user for token
-      shell: kubectl apply -f dashboard-user.yml
+
+    - name: Kubedashbord Role Binding
+      shell: kubectl -n kubernetes-dashboard create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
       become_user: admin
-      args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Create cluster role ClusterRoleBinding for token
-      shell: kubectl apply -f ClusterRoleBinding.yml
+
+    - name: Expose Kubernetes Dashboard
+      shell: kubectl delete service kubernetes-dashboard -n kubernetes-dashboard && kubectl expose deployment kubernetes-dashboard --type=NodePort --name=kubernetes-dashboard -n kubernetes-dashboard
       become_user: admin
-      args:
-        chdir: /home/admin/Ansible-HA-Automation/Monitoring
-    - name: Create token for dashboard pipe into text file
-      shell: kubectl -n kubernetes-dashboard create token admin-user >> /home/admin/token.txt
+
+    - name: Kubernetes Dashboard Token
+      shell: kubectl -n kubernetes-dashboard create token dashboard-admin
+      register: token_output
       become_user: admin
-    - name: Recursively remove directory
-      ansible.builtin.file:
-        path: /home/admin/Ansible-HA-Automation
-        state: absent
 
+    - name: Requesting Grafana Port
+      shell: kubectl -n prometheus get service prometheus-grafana
+      register: grafana_port
+      become_user: admin
 
+    - name: Requesting Dashboard Port
+      shell: kubectl -n kubernetes-dashboard get service kubernetes-dashboard
+      register: dashboard_port
+      become_user: admin
 
-
-    
-    
-
-    
-  
+    - name: Write info to /tmp/important.txt
+      copy:
+        dest: "/tmp/important.txt"
+        content: |
+          "{{ token_output.stdout }}"
+          "{{dashboard_port.stdout}}"
+          "{{grafana_port.stdout}}"
+          "Grafna login = admin:prom-operator"
+      delegate_to: localhost
