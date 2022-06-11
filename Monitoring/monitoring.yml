@@ -77,5 +77,5 @@
           "{{ token_output.stdout }}"
           "{{dashboard_port.stdout}}"
           "{{grafana_port.stdout}}"
-          "Grafna admin:prom-operator"
+          "Grafna login = admin:prom-operator"
       delegate_to: localhost
