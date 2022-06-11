@@ -46,11 +46,11 @@
       become_user: admin
 
     - name: Kubedashbord Account
-      shell: kubectl apply -f ~/Ansible-HA-Automation/src/Service-Account.yml
+      shell: kubectl apply -f ~/Ansible-HA-Automation/Monitoring/src/Service-Account.yml
       become_user: admin
 
     - name: Kubedashbord Role Binding
-      shell: kubectl apply -f ~/Ansible-HA-Automation/src/ClusterRoleBinding.yml
+      shell: kubectl apply -f ~/Ansible-HA-Automation/Monitoring/src/ClusterRoleBinding.yml
       become_user: admin
 
     - name: Install Kubernetes Dashboard
