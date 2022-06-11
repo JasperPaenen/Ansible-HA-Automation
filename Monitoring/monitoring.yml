@@ -45,16 +45,16 @@
       shell: kubectl expose deployment prometheus-grafana --type=NodePort --name=prometheus-grafana -n prometheus
       become_user: admin
 
+    - name: Install Kubernetes Dashboard
+      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
+      become_user: admin
+
     - name: Kubedashbord Account
       shell: kubectl apply -f ~/Ansible-HA-Automation/Monitoring/src/Service-account.yml
       become_user: admin
 
     - name: Kubedashbord Role Binding
       shell: kubectl apply -f ~/Ansible-HA-Automation/Monitoring/src/ClusterRoleBinding.yml
-      become_user: admin
-
-    - name: Install Kubernetes Dashboard
-      shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
       become_user: admin
 
     - name: Expose Kubernetes Dashboard
@@ -66,10 +66,23 @@
       register: token_output
       become_user: admin
 
-    - name: Belangrijke info naar /tmp/
+    - name: Requesting Grafana Port
+      shell: kubectl -n prometheus get service prometheus-grafana
+      register: grafana_port
+      become_user: admin
+
+    - name: Requesting Dashboard Port
+      shell: kubectl -n kubernetes-dashboard get service kubernetes-dashboard
+      register:: dashboard_port
+      become_user: admin
+
+    - name: Write info to /tmp/important.txt
       copy:
-        content: "{{ token_output.stdout }}"
-        dest: "/tmp/belangrijk.txt"
+        dest: "/tmp/important.txt"
+        content: |
+          "{{ token_output.stdout }}"
+          "{{dashboard_port.stdout}}"
+          "{{grafana_port.stdout}}"
       delegate_to: localhost
 
     - name: Clean up
