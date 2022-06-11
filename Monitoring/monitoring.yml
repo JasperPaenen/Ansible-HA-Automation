@@ -2,12 +2,6 @@
   become: yes
 
   tasks:
-    - name: Clone files
-      ansible.builtin.git:
-        repo: https://github.com/JasperPaenen/Ansible-HA-Automation.git
-        version: Test
-        dest: /home/admin/Ansible-HA-Automation
-
     - name: Create Prometheus namespace
       shell: kubectl create namespace prometheus
       become_user: admin
@@ -49,12 +43,12 @@
       shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
       become_user: admin
 
-    - name: Kubedashbord Account
-      shell: kubectl apply -f ~/Ansible-HA-Automation/Monitoring/src/Service-account.yml
+    - name: Kubedashbord Admin Account
+      shell: kubectl create serviceaccount dashboard-admin
       become_user: admin
 
     - name: Kubedashbord Role Binding
-      shell: kubectl apply -f ~/Ansible-HA-Automation/Monitoring/src/ClusterRoleBinding.yml
+      shell: kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
       become_user: admin
 
     - name: Expose Kubernetes Dashboard
@@ -62,7 +56,7 @@
       become_user: admin
 
     - name: Kubernetes Dashboard Token
-      shell: kubectl -n kubernetes-dashboard create token admin-user
+      shell: kubectl -n kubernetes-dashboard create token dashboard-admin
       register: token_output
       become_user: admin
 
@@ -73,7 +67,7 @@
 
     - name: Requesting Dashboard Port
       shell: kubectl -n kubernetes-dashboard get service kubernetes-dashboard
-      register:: dashboard_port
+      register: dashboard_port
       become_user: admin
 
     - name: Write info to /tmp/important.txt
@@ -84,8 +78,3 @@
           "{{dashboard_port.stdout}}"
           "{{grafana_port.stdout}}"
       delegate_to: localhost
-
-    - name: Clean up
-      ansible.builtin.file:
-        path: /home/admin/Ansible-HA-Automation
-        state: absent 
