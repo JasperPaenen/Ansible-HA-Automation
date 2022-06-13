@@ -70,6 +70,11 @@
       register: dashboard_port
       become_user: admin
 
+    - name: Install Kubescape
+      shell: curl -s https://raw.githubusercontent.com/armosec/kubescape/master/install.sh | /bin/bash
+      args:
+        warn: false
+
     - name: Write info to /tmp/important.txt
       copy:
         dest: "/tmp/important.txt"
@@ -79,3 +84,11 @@
           "{{grafana_port.stdout}}"
           "Grafna login = admin:prom-operator"
       delegate_to: localhost
+
+    - name: Post install message
+      debug:
+        msg:
+          - 'Things left to do:'
+          - '- Info about Kuberneets-dashboard & Grafana can be found in /tmp/important.txt !!!!Put this file somewhere secure!!!!'
+          - '- Kubescape can be used on master-01: kubescape scan --submit --enable-host-scan --verbose'
+          - '- Have fun - Jasper & Kubilay'
